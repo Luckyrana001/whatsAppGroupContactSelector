@@ -1,16 +1,16 @@
 # whatsAppGroupContactSelector
 whats app like group contact add/remove functionality sample
 
-<img src="https://drive.google.com/file/d/0B31j9kjWGFfHOEtURXpBbDIzSlE/view" alt="Mountain View" style="width:304px;height:228px;">
 
+https://drive.google.com/file/d/0B31j9kjWGFfHOEtURXpBbDIzSlE/view
 To add animation for adding and removing recyler view , following two method are used in adapter of this sample app:
 
  
 
-1 . <B> // Add item containing a specified Data object </B>
+1 . <B> // Add item containing a specified Data object </B></br>
 public void insert(int position, UserList data)
 
-2. <B> // Remove a RecyclerView item containing a specified Data object </B>
+2. <B> // Remove a RecyclerView item containing a specified Data object </B></br>
 public void remove(UserList data) 
    
  
