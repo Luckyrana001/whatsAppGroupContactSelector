@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="55dp"
+    >
+    <ImageView
+        android:id="@+id/imageTv"
+
+        android:layout_marginLeft="5dp"
+        android:layout_width="50dp"
+        android:layout_marginRight="50dp"
+        android:padding="4dp"
+        android:layout_alignParentLeft="true"
+        android:layout_height="50dp"
+        android:src="@drawable/avatar"/>
+    <TextView
+        android:id="@+id/nametv"
+        android:text=" "
+        android:textSize="14sp"
+        android:layout_marginLeft="50dp"
+        android:layout_marginRight="50dp"
+        android:layout_width="match_parent"
+        android:singleLine="true"
+        android:textColor="@android:color/black"
+        android:paddingRight="10dp"
+        android:layout_height="30dp"
+        android:paddingTop="10dp"
+        android:paddingLeft="10dp"/>
+
+    <TextView
+        android:id="@+id/roleTv"
+        android:layout_marginTop="20dp"
+        android:text=""
+        android:textSize="12sp"
+        android:layout_marginLeft="50dp"
+        android:layout_marginRight="50dp"
+
+        android:textColor="@android:color/darker_gray"
+        android:paddingTop="10dp"
+        android:paddingLeft="10dp"
+        android:layout_width="match_parent"
+        android:singleLine="true"
+        android:paddingRight="10dp"
+        android:layout_height="wrap_content"
+        />
+
+<RelativeLayout
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content">
+
+
+    <ImageView
+        android:id="@+id/checkboxTv"
+        android:layout_width="wrap_content"
+        android:layout_alignParentRight="true"
+        android:paddingLeft="20dp"
+        android:visibility="visible"
+        android:layout_height="match_parent"
+        android:paddingRight="15dp"
+        android:src="@android:drawable/checkbox_on_background"/>
+
+</RelativeLayout>
+
+    <TextView
+        android:id="@+id/idTv"
+        android:text=""
+        android:visibility="invisible"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        />
+
+</RelativeLayout>
