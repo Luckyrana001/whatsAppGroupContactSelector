@@ -40,7 +40,7 @@ import java.util.List;
  */
 public class SelectGroupContactsActivity extends AppCompatActivity implements SearchCallback,  AdapterView.OnItemSelectedListener,
         SearchView.OnQueryTextListener {
-
+    View container;
     TextView noRecordFound;
     int count = 0;
     private RecyclerView mainListRecyclerView,selectedListRecylerView;
@@ -52,7 +52,7 @@ public class SelectGroupContactsActivity extends AppCompatActivity implements Se
 
 
     private ActionBar mActionBar;
-    
+    boolean playAnimations = true;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -71,7 +71,22 @@ public class SelectGroupContactsActivity extends AppCompatActivity implements Se
     }
 
 
+    /*alpha change animation on first time window will get focus*/
+@Override
+public void onWindowFocusChanged(boolean hasFocus)
+{
+    super.onWindowFocusChanged(hasFocus);
+    if(hasFocus)
+    {
+        showContainer();
+        playAnimations = false;
+    }
 
+}
+
+    private void showContainer() {
+        container.animate().alpha(1f).setDuration(1000);
+    }
 
 
     private void setupActionBar() {
@@ -157,6 +172,8 @@ public class SelectGroupContactsActivity extends AppCompatActivity implements Se
     }
 
     private void initLayout() {
+
+        container = findViewById(R.id.container);
        /* eEditText = (SearchView)findViewById(R.id.eEditText);
         eEditText.setOnQueryTextListener(this);
 */
