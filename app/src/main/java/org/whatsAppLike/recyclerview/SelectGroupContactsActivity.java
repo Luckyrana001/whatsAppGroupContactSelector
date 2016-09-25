@@ -1,5 +1,7 @@
 package org.whatsAppLike.recyclerview;
 
+import android.animation.ObjectAnimator;
+import android.animation.PropertyValuesHolder;
 import android.content.Context;
 import android.os.Bundle;
 import android.support.v4.view.MenuItemCompat;
@@ -16,6 +18,7 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.Button;
+import android.widget.ImageView;
 import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -41,6 +44,8 @@ import java.util.List;
 public class SelectGroupContactsActivity extends AppCompatActivity implements SearchCallback,  AdapterView.OnItemSelectedListener,
         SearchView.OnQueryTextListener {
     View container;
+    boolean playAnimations = true;
+
     TextView noRecordFound;
     int count = 0;
     private RecyclerView mainListRecyclerView,selectedListRecylerView;
@@ -52,7 +57,6 @@ public class SelectGroupContactsActivity extends AppCompatActivity implements Se
 
 
     private ActionBar mActionBar;
-    boolean playAnimations = true;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -174,14 +178,10 @@ public void onWindowFocusChanged(boolean hasFocus)
     private void initLayout() {
 
         container = findViewById(R.id.container);
-       /* eEditText = (SearchView)findViewById(R.id.eEditText);
-        eEditText.setOnQueryTextListener(this);
-*/
         mainListRecyclerView = (RecyclerView) findViewById(R.id.main_list_recyclerView);
         selectedListRecylerView = (RecyclerView) findViewById(R.id.selectedListRecylerView);
 
         noRecordFound = (TextView) findViewById(R.id.noRecordFound);
-        // mainListRecyclerView.setLayoutManager(new LinearLayoutManager(getApplicationContext()));
         mModels = new ArrayList<UserList>();
 
 
@@ -231,6 +231,8 @@ public void onWindowFocusChanged(boolean hasFocus)
        /*         Insert new items to horizonontal list view */
                 if(itemStatus) {
                     selectedUserAdapter.insert(newModel);
+                    selectedListRecylerView.scrollToPosition(selectedModelList.size()-1);
+
                 }
                 else
                 {
@@ -246,7 +248,6 @@ public void onWindowFocusChanged(boolean hasFocus)
                     selectedListRecylerView.setVisibility(View.GONE);
 
                 }
-                selectedListRecylerView.scrollToPosition(selectedModelList.size()-1);
                 }
 
 
@@ -261,6 +262,63 @@ public void onWindowFocusChanged(boolean hasFocus)
             @Override
             public void onClick(View view, int position) {
 
+                TextView id = (TextView)view.findViewById(R.id.idTv);
+                ImageView profilePic = (ImageView)view.findViewById(R.id.profilePic);
+                boolean itemStatus = false;
+                UserList newModel = null;
+
+                for(int i = 0; i < mModels.size();i++)
+                {
+                    UserList model = mModels.get(i);
+
+                    if(id.getText().toString().trim().equals(model.getId()))
+                    {
+                        if(model.isCheckStatus())
+                        {
+                            model.setCheckStatus(false);
+                            count--;
+                            itemStatus = false;
+                            newModel = model;
+                        }
+                        else
+                        {
+                            model.setCheckStatus(true);
+                            count++;
+                            itemStatus = true;
+                            newModel = model;
+
+                        }
+                        mAdapter.notifyDataSetChanged();
+
+                        break;
+                    }
+                }
+
+                if(itemStatus) {
+                    selectedUserAdapter.insert(newModel);
+
+                }
+                else
+                {
+                    selectedUserAdapter.remove(newModel);
+                    PropertyValuesHolder scaleXholder = PropertyValuesHolder.ofFloat(View.SCALE_X,0f);
+                    PropertyValuesHolder scaleYholder = PropertyValuesHolder.ofFloat(View.SCALE_Y,0f);
+
+                    ObjectAnimator animateProfilePic = ObjectAnimator.ofPropertyValuesHolder(profilePic,scaleYholder, scaleXholder);
+                    animateProfilePic.setDuration(1000);
+                    animateProfilePic.start();
+                }
+                if(selectedModelList.size()>0)
+                {
+                    selectedListRecylerView.setVisibility(View.VISIBLE);
+                }
+                else
+                {
+                    selectedListRecylerView.setVisibility(View.GONE);
+
+                }
+                //selectedListRecylerView.scrollToPosition(selectedModelList.size()-1);
+                setToolbar();
 
             }
 
@@ -338,58 +396,9 @@ public void onWindowFocusChanged(boolean hasFocus)
     @Override
     public void changeCheckedStatus(String  id) {
 
-        int selPos = 0;
-        boolean itemStatus = false;
-        UserList newModel = null;
-
-        for(int i = 0; i < mModels.size();i++)
-        {
-            UserList model = mModels.get(i);
-
-            if(id.equals(model.getId()))
-            {
-                if(model.isCheckStatus())
-                {
-                    model.setCheckStatus(false);
-                    count--;
-                    itemStatus = false;
-                    newModel = model;
-                }
-                else
-                {
-                    model.setCheckStatus(true);
-                    count++;
-                    itemStatus = true;
-                    newModel = model;
-
-                }
-                mAdapter.notifyDataSetChanged();
-
-                break;
-            }
-        }
-
-        if(itemStatus) {
-            selectedUserAdapter.insert(newModel);
-        }
-        else
-        {
-            selectedUserAdapter.remove(newModel);
-        }
-        if(selectedModelList.size()>0)
-        {
-            selectedListRecylerView.setVisibility(View.VISIBLE);
-        }
-        else
-        {
-            selectedListRecylerView.setVisibility(View.GONE);
-
-        }
-        //selectedListRecylerView.scrollToPosition(selectedModelList.size()-1);
-        setToolbar();
-
-
     }
+
+
 
 
     public interface ClickListener {

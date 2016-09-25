@@ -2,9 +2,11 @@
 <LinearLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
+    android:id="@+id/container"
+    android:alpha="0"
     android:background="@android:color/white"
-    android:orientation="vertical"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    android:orientation="vertical">
 
  <!--   <android.support.v7.widget.SearchView
          android:id="@+id/eEditText"

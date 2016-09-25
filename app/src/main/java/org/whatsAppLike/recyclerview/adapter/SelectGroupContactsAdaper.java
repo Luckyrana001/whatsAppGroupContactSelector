@@ -53,10 +53,10 @@ public class SelectGroupContactsAdaper extends RecyclerView.Adapter<SelectGroupC
 
 
     }
-    public void animate(RecyclerView.ViewHolder viewHolder) {
+   /* public void animate(RecyclerView.ViewHolder viewHolder) {
         final Animation animAnticipateOvershoot = AnimationUtils.loadAnimation(context, R.anim.anticipateovershoot_interpolator);
         viewHolder.itemView.setAnimation(animAnticipateOvershoot);
-    }
+    }*/
     public ExampleViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
         final View itemView = mInflater.inflate(R.layout.add_group_contacts, parent, false);
         return new ExampleViewHolder(itemView);
@@ -70,19 +70,7 @@ public class SelectGroupContactsAdaper extends RecyclerView.Adapter<SelectGroupC
         holder.idTv.setText(checkNullString(model.getId()));
         holder.roleTv.setText(model.getRole());
 
-        holder.tvText.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                animate(holder);
-                notifyDataSetChanged();
-            }
-        });
-        holder.checkbox.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                animate(holder);
-            }
-        });
+
         if(model.isCheckStatus())
         {
             holder.checkbox.setImageResource(android.R.drawable.checkbox_on_background);

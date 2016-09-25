@@ -1,5 +1,7 @@
 package org.whatsAppLike.recyclerview.adapter;
 
+import android.animation.ObjectAnimator;
+import android.animation.PropertyValuesHolder;
 import android.content.Context;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
@@ -25,8 +27,10 @@ public class SearchUserAdapter extends RecyclerView.Adapter<SearchUserAdapter.Vi
     Context context;
     private final LayoutInflater mInflater;
     private  List<UserList> mModels ;
-    ImageView imageTv;
     SearchCallback callback;
+     View view ;
+    boolean itemAdded = false;
+    ViewHolder itemHolder;
     /*public SearchUserAdapter(Context context, List<UserList> models) {
         mInflater = LayoutInflater.from(context);
         mModels = new ArrayList<>(models);
@@ -43,27 +47,26 @@ public class SearchUserAdapter extends RecyclerView.Adapter<SearchUserAdapter.Vi
     public class ViewHolder extends RecyclerView.ViewHolder {
 
        private final TextView tvText,idTv;
-        ImageView crossImg;
+        final ImageView crossImg,profilePic;
 
         public ViewHolder(View itemView) {
             super(itemView);
+          //  item = itemView;
             tvText = (TextView) itemView.findViewById(R.id.nametv);
             crossImg =  (ImageView) itemView.findViewById(R.id.crossImg);
             idTv =  (TextView) itemView.findViewById(R.id.idTv);
+            profilePic=  (ImageView) itemView.findViewById(R.id.profilePic);
            }
 
 
     }
 
     public ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
-        final View itemView = mInflater.inflate(R.layout.selected_user_list, parent, false);
-        return new ViewHolder(itemView);
+        view = mInflater.inflate(R.layout.selected_user_list, parent, false);
+        return new ViewHolder(view);
     }
-    /*public void animate(RecyclerView.ViewHolder viewHolder) {
-        final Animation animAnticipateOvershoot = AnimationUtils.loadAnimation(context, R.anim.bounce_interpolator);
-        viewHolder.itemView.setAnimation(animAnticipateOvershoot);
-    }*/
     public void onBindViewHolder(final ViewHolder holder, final int position) {
+        itemHolder = holder;
         final UserList model = mModels.get(position);
 
         holder.tvText.setText(model.getName());
@@ -75,6 +78,27 @@ public class SearchUserAdapter extends RecyclerView.Adapter<SearchUserAdapter.Vi
             }
         });
       holder.idTv.setText(model.getId());
+
+
+       if(model.isCheckStatus())
+        {
+            PropertyValuesHolder scaleXholder = PropertyValuesHolder.ofFloat(View.SCALE_X, 1f);
+            PropertyValuesHolder scaleYholder = PropertyValuesHolder.ofFloat(View.SCALE_Y, 1f);
+
+            ObjectAnimator animateProfilePic = ObjectAnimator.ofPropertyValuesHolder(holder.profilePic, scaleXholder, scaleYholder);
+            animateProfilePic.setDuration(1000);
+            animateProfilePic.start();
+        }
+        /*else
+        {
+            PropertyValuesHolder scaleXholder = PropertyValuesHolder.ofFloat(View.SCALE_X,0f);
+            PropertyValuesHolder scaleYholder = PropertyValuesHolder.ofFloat(View.SCALE_Y,0f);
+
+            ObjectAnimator animateProfilePic = ObjectAnimator.ofPropertyValuesHolder(holder.profilePic,scaleYholder, scaleXholder);
+            animateProfilePic.setDuration(1000);
+            animateProfilePic.start();
+        }*/
+
 
 
     }
@@ -96,7 +120,6 @@ public class SearchUserAdapter extends RecyclerView.Adapter<SearchUserAdapter.Vi
     public void insert(UserList data) {
         mModels.add(data);
         notifyItemInserted(mModels.size()-1);
-       // notifyDataSetChanged();
     }
 
     // Remove a RecyclerView item containing a specified Data object
@@ -104,8 +127,31 @@ public class SearchUserAdapter extends RecyclerView.Adapter<SearchUserAdapter.Vi
         int position = mModels.indexOf(data);
         mModels.remove(position);
         notifyItemRemoved(position);
+       // itemRemoveAnimation();
+
+    }
+
+    public void itemAddAnimation() {
+        if(view!=null) {
+            ImageView profilePic = (ImageView) view.findViewById(R.id.profilePic);
+            PropertyValuesHolder scaleXholder = PropertyValuesHolder.ofFloat(View.SCALE_X, 1f);
+            PropertyValuesHolder scaleYholder = PropertyValuesHolder.ofFloat(View.SCALE_Y, 1f);
+
+            ObjectAnimator animateProfilePic = ObjectAnimator.ofPropertyValuesHolder(profilePic, scaleXholder, scaleYholder);
+            animateProfilePic.setDuration(1000);
+            animateProfilePic.start();
+        }
     }
 
 
+    public void itemRemoveAnimation() {
+        ImageView profilePic = (ImageView) view.findViewById(R.id.profilePic);
+        PropertyValuesHolder scaleXholder = PropertyValuesHolder.ofFloat(View.SCALE_X,0f);
+        PropertyValuesHolder scaleYholder = PropertyValuesHolder.ofFloat(View.SCALE_Y,0f);
+
+        ObjectAnimator animateProfilePic = ObjectAnimator.ofPropertyValuesHolder(profilePic,scaleYholder, scaleXholder);
+        animateProfilePic.setDuration(1000);
+        animateProfilePic.start();
+    }
 
 }
