@@ -5,6 +5,7 @@ import android.animation.AnimatorListenerAdapter;
 import android.animation.ObjectAnimator;
 import android.animation.PropertyValuesHolder;
 import android.content.Context;
+import android.content.res.Resources;
 import android.os.Bundle;
 import android.support.v4.view.MenuItemCompat;
 import android.support.v7.app.ActionBar;
@@ -13,8 +14,10 @@ import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.SearchView;
+import android.support.v7.widget.Toolbar;
 import android.view.GestureDetector;
 import android.view.Menu;
+import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
@@ -42,6 +45,10 @@ import java.util.List;
  */
 public class SelectGroupContactsActivity extends AppCompatActivity implements SearchCallback,  AdapterView.OnItemSelectedListener,
         SearchView.OnQueryTextListener {
+    public static final String ACTION_SHOW_LOADING_ITEM = "action_show_loading_item";
+    private static final int ANIM_DURATION_TOOLBAR = 300;
+    private static final int ANIM_DURATION_FAB = 400;
+
     View container;
     boolean playAnimations = true;
     LinearLayoutManager horizontalLayoutManagaer;
@@ -50,8 +57,11 @@ public class SelectGroupContactsActivity extends AppCompatActivity implements Se
     private RecyclerView mainListRecyclerView,selectedListRecylerView;
     private SelectGroupContactsAdaper mAdapter;
     private SearchUserAdapter selectedUserAdapter;
-    private ArrayList<UserList> mModels;
+    private ArrayList<UserList> mModels = new ArrayList<UserList>();
     ArrayList<UserList> selectedModelList = new ArrayList<UserList>();
+    Toolbar toolbar;
+    MenuItem doneBtn;
+    private boolean pendingIntroAnimation;
 
 
     private ActionBar mActionBar;
@@ -61,15 +71,19 @@ public class SelectGroupContactsActivity extends AppCompatActivity implements Se
 
         setContentView(R.layout.add_contact_layout);
 
-        setupActionBar();
-
         initLayout();
+      /* Intialize Toolbar */
+        initToolBar();
 
-        setUpList();
-        /* Intialize Toolbar */
-        setToolbar();
+        setMainListAdapter();
 
         setUpSelectedListAdapter(selectedModelList);
+
+        if (savedInstanceState == null) {
+            pendingIntroAnimation = true;
+        } else {
+          mAdapter.notifyDataSetChanged();
+        }
     }
 
 
@@ -87,51 +101,34 @@ public void onWindowFocusChanged(boolean hasFocus)
 }
 
     private void showContainer() {
-        container.animate().alpha(1f).setDuration(1000);
-    }
-
-
-    private void setupActionBar() {
-
-        mActionBar = getSupportActionBar();
-        mActionBar.setDisplayShowHomeEnabled(true);
-        mActionBar.setDisplayHomeAsUpEnabled(true);
-
+        container.animate().alpha(1f).setDuration(500);
     }
 
 
 
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        int id = item.getItemId();
 
+    public void initToolBar() {
+        toolbar = (Toolbar) findViewById(R.id.toolbar);
+        toolbar.setTitle(selectedModelList.size() +" / "+mModels.size());
 
+        setSupportActionBar(toolbar);
 
-  if(id == R.id.action_search)
-  {
-      final SearchView searchView = (SearchView) MenuItemCompat.getActionView(item);
-      searchView.setOnQueryTextListener(this);
-      return true;
-  }
+                toolbar.setNavigationIcon(R.drawable.ic_toolbar_arrow);
+        toolbar.setNavigationOnClickListener(
+                new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        finish();
+                    }
+                }
 
-        if (id == android.R.id.home) {
-            // app icon in action bar clicked; goto parent activity.
-            this.finish();
-            return true;
+        );
 
-        }
-        if (id == R.id.Done) {
-            Toast.makeText(getApplicationContext(), "Done clicked.", Toast.LENGTH_SHORT).show();
-            return true;
-
-        }
-        return  false;
-    }
-
-
-
+}
 
     private void initLayout() {
+
+        toolbar = (Toolbar)findViewById(R.id.toolbar);
 
         container = findViewById(R.id.container);
         mainListRecyclerView = (RecyclerView) findViewById(R.id.main_list_recyclerView);
@@ -210,7 +207,8 @@ public void onWindowFocusChanged(boolean hasFocus)
 
                   selectedUserAdapter.remove(newModel);
                 }
-                setToolbar();
+                toolbar.setTitle(selectedModelList.size() +" / "+mModels.size());
+
                 showHideHorizontalView();
        }
 
@@ -275,9 +273,8 @@ public void onWindowFocusChanged(boolean hasFocus)
                 }
 
                 showHideHorizontalView();
+                toolbar.setTitle(selectedModelList.size() +" / "+mModels.size());
 
-                //selectedListRecylerView.scrollToPosition(selectedModelList.size()-1);
-                setToolbar();
 
             }
 
@@ -356,8 +353,9 @@ public void onWindowFocusChanged(boolean hasFocus)
 
 
     private void setMainListAdapter() {
-        if (mModels.size() > 0) {
-            mAdapter = new SelectGroupContactsAdaper(getApplicationContext(), mModels);
+        mAdapter = new SelectGroupContactsAdaper(getApplicationContext(), mModels);
+
+       // if (mModels.size() > 0) {
             mainListRecyclerView.setHasFixedSize(true);
             RecyclerView.LayoutManager mLayoutManager = new LinearLayoutManager(getApplicationContext());
             mainListRecyclerView.setLayoutManager(mLayoutManager);
@@ -366,10 +364,10 @@ public void onWindowFocusChanged(boolean hasFocus)
 
             mainListRecyclerView.setAdapter(mAdapter);
 
-            noRecordFound.setVisibility(View.GONE);
+          /*  noRecordFound.setVisibility(View.GONE);
         } else {
             noRecordFound.setVisibility(View.VISIBLE);
-        }
+        }*/
     }
 
     @Override
@@ -443,28 +441,68 @@ public void onWindowFocusChanged(boolean hasFocus)
 
     private void setToolbar() {
 
-        getSupportActionBar().setTitle(selectedModelList.size() +" / "+mModels.size());
-        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-        getSupportActionBar().setDisplayShowHomeEnabled(true);
-        getSupportActionBar().setHomeButtonEnabled(true);
 
+        toolbar.animate()
+                    .translationY(0)
+                    .setDuration(ANIM_DURATION_TOOLBAR)
+                    .setStartDelay(300) ;
+       /* doneBtn.animate()
+                    .translationY(0)
+                    .setDuration(ANIM_DURATION_TOOLBAR)
+                    .setStartDelay(400);*/
+        doneBtn.getActionView().animate()
+                    .translationY(0)
+                    .setDuration(ANIM_DURATION_TOOLBAR)
+                    .setStartDelay(500)
+                    .setListener(new AnimatorListenerAdapter() {
+                        @Override
+                        public void onAnimationEnd(Animator animation) {
+
+                            setUpList();
+                            toolbar.setTitle(selectedModelList.size() +" / "+mModels.size());
+
+                           mAdapter. updateItems(mModels);
+
+                        }
+                    })
+                   .start();
 
     }
+
+    public static int dpToPx(int dp) {
+        return (int) (dp * Resources.getSystem().getDisplayMetrics().density);
+    }
+
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.group_create_menu, menu);
         menu.removeItem(R.id.Next);
 
-        MenuItem Done = menu.findItem(R.id.Done);
-        Done.setTitle(getResources().getString(R.string.done));
-
+        doneBtn  = menu.findItem(R.id.Done);
+        doneBtn.setActionView(R.layout.menu_item_view);
 
         final MenuItem item = menu.findItem(R.id.action_search);
         final SearchView searchView = (SearchView) MenuItemCompat.getActionView(item);
         searchView.setOnQueryTextListener(this);
+
+        if (pendingIntroAnimation) {
+            pendingIntroAnimation = false;
+            setToolbar();
+        }
         return true;
     }
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        int id = item.getItemId();
 
+
+        if (id == R.id.Done) {
+            Toast.makeText(getApplicationContext(), "Done clicked.", Toast.LENGTH_SHORT).show();
+            return true;
+
+        }
+        return  false;
+    }
     @Override
     public boolean onQueryTextChange(String query) {
         if(mModels.size()>0) {
@@ -517,7 +555,6 @@ public void onWindowFocusChanged(boolean hasFocus)
             model.setCheckStatus(false);
             mModels.set(j,model);
         }
-        setMainListAdapter();
     }
 
 

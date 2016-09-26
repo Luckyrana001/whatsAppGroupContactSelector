@@ -10,9 +10,14 @@ import android.view.animation.AnimationUtils;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.google.gson.Gson;
+
 import org.whatsAppLike.recyclerview.R;
 import org.whatsAppLike.recyclerview.model.UserList;
+import org.whatsAppLike.recyclerview.model.UserListResponseModel;
 
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -22,7 +27,7 @@ import java.util.List;
 public class SelectGroupContactsAdaper extends RecyclerView.Adapter<SelectGroupContactsAdaper.ExampleViewHolder> {
     Context context;
     private final LayoutInflater mInflater;
-    private final List<UserList> mModels;
+    private List<UserList> mModels;
     ImageView imageTv;
 
     /*public SearchUserAdapter(Context context, List<UserList> models) {
@@ -35,6 +40,9 @@ public class SelectGroupContactsAdaper extends RecyclerView.Adapter<SelectGroupC
         mModels = new ArrayList<>(models);
         this.context = context;
     }
+
+
+
 
 
     public class ExampleViewHolder extends RecyclerView.ViewHolder {
@@ -95,7 +103,10 @@ public class SelectGroupContactsAdaper extends RecyclerView.Adapter<SelectGroupC
         applyAndAnimateAdditions(models);
         applyAndAnimateMovedItems(models);
     }
-
+    public void updateItems(ArrayList<UserList> data) {
+         mModels.addAll(data);
+        notifyItemRangeInserted(0, mModels.size());
+    }
     private void applyAndAnimateRemovals(List<UserList> newModels) {
         for (int i = mModels.size() - 1; i >= 0; i--) {
             final UserList model = mModels.get(i);
