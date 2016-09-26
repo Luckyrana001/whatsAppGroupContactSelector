@@ -43,6 +43,10 @@ public class SearchUserAdapter extends RecyclerView.Adapter<SearchUserAdapter.Vi
         this.callback = callback;
     }
 
+    public View getView() {
+        return view;
+    }
+
 
     public class ViewHolder extends RecyclerView.ViewHolder {
 
@@ -82,22 +86,16 @@ public class SearchUserAdapter extends RecyclerView.Adapter<SearchUserAdapter.Vi
 
        if(model.isCheckStatus())
         {
+
             PropertyValuesHolder scaleXholder = PropertyValuesHolder.ofFloat(View.SCALE_X, 1f);
             PropertyValuesHolder scaleYholder = PropertyValuesHolder.ofFloat(View.SCALE_Y, 1f);
 
             ObjectAnimator animateProfilePic = ObjectAnimator.ofPropertyValuesHolder(holder.profilePic, scaleXholder, scaleYholder);
-            animateProfilePic.setDuration(1000);
+            animateProfilePic.setDuration(750);
             animateProfilePic.start();
-        }
-        /*else
-        {
-            PropertyValuesHolder scaleXholder = PropertyValuesHolder.ofFloat(View.SCALE_X,0f);
-            PropertyValuesHolder scaleYholder = PropertyValuesHolder.ofFloat(View.SCALE_Y,0f);
 
-            ObjectAnimator animateProfilePic = ObjectAnimator.ofPropertyValuesHolder(holder.profilePic,scaleYholder, scaleXholder);
-            animateProfilePic.setDuration(1000);
-            animateProfilePic.start();
-        }*/
+
+        }
 
 
 
@@ -110,16 +108,20 @@ public class SearchUserAdapter extends RecyclerView.Adapter<SearchUserAdapter.Vi
         return mModels.size();
     }
 
-
+    public Object getItem(int position) {
+        return mModels.get(position);
+    }
     @Override
     public void onAttachedToRecyclerView(RecyclerView recyclerView) {
         super.onAttachedToRecyclerView(recyclerView);
     }
 
     // Insert a new item to the RecyclerView on a predefined position
-    public void insert(UserList data) {
+    public int  insert(UserList data) {
+
         mModels.add(data);
         notifyItemInserted(mModels.size()-1);
+        return mModels.size()-1;
     }
 
     // Remove a RecyclerView item containing a specified Data object
@@ -127,17 +129,20 @@ public class SearchUserAdapter extends RecyclerView.Adapter<SearchUserAdapter.Vi
         int position = mModels.indexOf(data);
         mModels.remove(position);
         notifyItemRemoved(position);
-       // itemRemoveAnimation();
 
+    }
+    public int removeItemPos(UserList data)
+    {
+        return mModels.indexOf(data);
     }
 
     public void itemAddAnimation() {
         if(view!=null) {
-            ImageView profilePic = (ImageView) view.findViewById(R.id.profilePic);
+           // ImageView profilePic = (ImageView) view.findViewById(R.id.profilePic);
             PropertyValuesHolder scaleXholder = PropertyValuesHolder.ofFloat(View.SCALE_X, 1f);
             PropertyValuesHolder scaleYholder = PropertyValuesHolder.ofFloat(View.SCALE_Y, 1f);
 
-            ObjectAnimator animateProfilePic = ObjectAnimator.ofPropertyValuesHolder(profilePic, scaleXholder, scaleYholder);
+            ObjectAnimator animateProfilePic = ObjectAnimator.ofPropertyValuesHolder(itemHolder.profilePic, scaleXholder, scaleYholder);
             animateProfilePic.setDuration(1000);
             animateProfilePic.start();
         }
@@ -145,11 +150,12 @@ public class SearchUserAdapter extends RecyclerView.Adapter<SearchUserAdapter.Vi
 
 
     public void itemRemoveAnimation() {
-        ImageView profilePic = (ImageView) view.findViewById(R.id.profilePic);
+       // ImageView profilePic = (ImageView) view.findViewById(R.id.profilePic);
+
         PropertyValuesHolder scaleXholder = PropertyValuesHolder.ofFloat(View.SCALE_X,0f);
         PropertyValuesHolder scaleYholder = PropertyValuesHolder.ofFloat(View.SCALE_Y,0f);
 
-        ObjectAnimator animateProfilePic = ObjectAnimator.ofPropertyValuesHolder(profilePic,scaleYholder, scaleXholder);
+        ObjectAnimator animateProfilePic = ObjectAnimator.ofPropertyValuesHolder(itemHolder.profilePic,scaleYholder, scaleXholder);
         animateProfilePic.setDuration(1000);
         animateProfilePic.start();
     }

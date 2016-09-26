@@ -1,5 +1,7 @@
 package org.whatsAppLike.recyclerview;
 
+import android.animation.Animator;
+import android.animation.AnimatorListenerAdapter;
 import android.animation.ObjectAnimator;
 import android.animation.PropertyValuesHolder;
 import android.content.Context;
@@ -17,9 +19,7 @@ import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
 import android.widget.AdapterView;
-import android.widget.Button;
 import android.widget.ImageView;
-import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -34,7 +34,6 @@ import org.whatsAppLike.recyclerview.model.UserListResponseModel;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.sql.Array;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -45,14 +44,13 @@ public class SelectGroupContactsActivity extends AppCompatActivity implements Se
         SearchView.OnQueryTextListener {
     View container;
     boolean playAnimations = true;
-
+    LinearLayoutManager horizontalLayoutManagaer;
     TextView noRecordFound;
     int count = 0;
     private RecyclerView mainListRecyclerView,selectedListRecylerView;
     private SelectGroupContactsAdaper mAdapter;
     private SearchUserAdapter selectedUserAdapter;
     private ArrayList<UserList> mModels;
-    SearchView eEditText;
     ArrayList<UserList> selectedModelList = new ArrayList<UserList>();
 
 
@@ -132,48 +130,6 @@ public void onWindowFocusChanged(boolean hasFocus)
 
 
 
-    private void setUpList() {
-
-       /* fetching list view data from json file which is stored in asset folder*/
-       final String customGSON = "{\"userList\":" + sampleReadMethod() + "}";
-
-        UserListResponseModel userModel = new Gson().fromJson(customGSON, UserListResponseModel.class);
-         mModels = userModel.getList();
-
-        int j=0;
-        for( j = 0;j < mModels.size()-1;j++);
-        {
-
-            UserList model = mModels.get(j);
-            model.setCheckStatus(false);
-            mModels.set(j,model);
-        }
-        setMainListAdapter();
-    }
-
-
-    public String sampleReadMethod()
-    {
-        String json = null;
-        try {
-            InputStream is;
-
-                is = getAssets().open("dev_user_list.json");
-
-
-            int size = is.available();
-            byte[] buffer = new byte[size];
-            is.read(buffer);
-            is.close();
-            json = new String(buffer, "UTF-8");
-        } catch (IOException ex) {
-            ex.printStackTrace();
-            return null;
-        }
-        return json;
-
-
-    }
 
     private void initLayout() {
 
@@ -198,7 +154,7 @@ public void onWindowFocusChanged(boolean hasFocus)
                 int selPos = 0;
                 boolean itemStatus = false;
                 UserList newModel = null;
-
+                int removedItemPosition = 0;
 
                 for(int i = 0; i < mModels.size();i++)
                 {
@@ -212,7 +168,7 @@ public void onWindowFocusChanged(boolean hasFocus)
                             count--;
                             itemStatus = false;
                             newModel = model;
-
+                            removedItemPosition = i;
                         }
                         else
                         {
@@ -230,25 +186,33 @@ public void onWindowFocusChanged(boolean hasFocus)
 
        /*         Insert new items to horizonontal list view */
                 if(itemStatus) {
-                    selectedUserAdapter.insert(newModel);
+                    int pos = selectedUserAdapter.insert(newModel);
                     selectedListRecylerView.scrollToPosition(selectedModelList.size()-1);
 
                 }
                 else
                 {
-                    selectedUserAdapter.remove(newModel);
+
+                  int p = selectedUserAdapter.removeItemPos(newModel);
+                    View view3 =  horizontalLayoutManagaer.findViewByPosition(p);
+
+                    if(view3!=null) {
+                        ImageView profilePic = (ImageView) view3.findViewById(R.id.profilePic);
+
+                        PropertyValuesHolder scaleXholder = PropertyValuesHolder.ofFloat(View.SCALE_X, 0f);
+                        PropertyValuesHolder scaleYholder = PropertyValuesHolder.ofFloat(View.SCALE_Y, 0f);
+
+                        ObjectAnimator animateProfilePic = ObjectAnimator.ofPropertyValuesHolder(profilePic, scaleYholder, scaleXholder);
+                        animateProfilePic.setDuration(1000);
+                        animateProfilePic.start();
+                    }
+
+
+                  selectedUserAdapter.remove(newModel);
                 }
                 setToolbar();
-                if(selectedModelList.size()>0)
-                {
-                    selectedListRecylerView.setVisibility(View.VISIBLE);
-                }
-                else
-                {
-                    selectedListRecylerView.setVisibility(View.GONE);
-
-                }
-                }
+                showHideHorizontalView();
+       }
 
 
             @Override
@@ -300,23 +264,18 @@ public void onWindowFocusChanged(boolean hasFocus)
                 }
                 else
                 {
-                    selectedUserAdapter.remove(newModel);
                     PropertyValuesHolder scaleXholder = PropertyValuesHolder.ofFloat(View.SCALE_X,0f);
                     PropertyValuesHolder scaleYholder = PropertyValuesHolder.ofFloat(View.SCALE_Y,0f);
 
                     ObjectAnimator animateProfilePic = ObjectAnimator.ofPropertyValuesHolder(profilePic,scaleYholder, scaleXholder);
-                    animateProfilePic.setDuration(1000);
+                    animateProfilePic.setDuration(750);
                     animateProfilePic.start();
-                }
-                if(selectedModelList.size()>0)
-                {
-                    selectedListRecylerView.setVisibility(View.VISIBLE);
-                }
-                else
-                {
-                    selectedListRecylerView.setVisibility(View.GONE);
+                    selectedUserAdapter.remove(newModel);
 
                 }
+
+                showHideHorizontalView();
+
                 //selectedListRecylerView.scrollToPosition(selectedModelList.size()-1);
                 setToolbar();
 
@@ -331,8 +290,51 @@ public void onWindowFocusChanged(boolean hasFocus)
 
     }
 
+    private void showHideHorizontalView() {
+        if(selectedModelList.size()>0)
+        {
+
+
+           // selectedListRecylerView.setVisibility(View.VISIBLE);
+            PropertyValuesHolder scaleXholder = PropertyValuesHolder.ofFloat(View.SCALE_X, 1f);
+            PropertyValuesHolder scaleYholder = PropertyValuesHolder.ofFloat(View.SCALE_Y, 1f);
+
+            ObjectAnimator animateView = ObjectAnimator.ofPropertyValuesHolder(selectedListRecylerView, scaleYholder, scaleXholder);
+            animateView.setDuration(750);
+            animateView.addListener(new AnimatorListenerAdapter() {
+                @Override
+                public void onAnimationStart(Animator animation) {
+                    super.onAnimationStart(animation);
+                    selectedListRecylerView.setVisibility(View.VISIBLE);
+                }
+            });
+            animateView.start();
+
+
+        }
+        else
+        {
+
+            PropertyValuesHolder scaleXholder = PropertyValuesHolder.ofFloat(View.SCALE_X, 0f);
+            PropertyValuesHolder scaleYholder = PropertyValuesHolder.ofFloat(View.SCALE_Y, 0f);
+
+            ObjectAnimator animateView = ObjectAnimator.ofPropertyValuesHolder(selectedListRecylerView, scaleYholder, scaleXholder);
+            animateView.setDuration(500);
+            animateView.addListener(new AnimatorListenerAdapter() {
+                @Override
+                public void onAnimationEnd(Animator animation) {
+                    super.onAnimationEnd(animation);
+                    selectedListRecylerView.setVisibility(View.GONE);
+
+                }
+            });
+            animateView.start();
+        }
+    }
+
+
     private void setUpSelectedListAdapter(ArrayList<UserList> list) {
-        LinearLayoutManager horizontalLayoutManagaer
+         horizontalLayoutManagaer
                 = new LinearLayoutManager(getApplicationContext(), LinearLayoutManager.HORIZONTAL, false);
 
         selectedListRecylerView.setLayoutManager(horizontalLayoutManagaer);
@@ -362,20 +364,7 @@ public void onWindowFocusChanged(boolean hasFocus)
             mainListRecyclerView.addItemDecoration(new DividerItemDecoration(this, LinearLayoutManager.VERTICAL));
             mainListRecyclerView.setItemAnimator(new DefaultItemAnimator());
 
-/*
-        Animation to increase add remove duration*/
-           /* RecyclerView.ItemAnimator itemAnimator = new DefaultItemAnimator();
-            itemAnimator.setAddDuration(500);
-            itemAnimator.setRemoveDuration(500);
-            mainListRecyclerView.setItemAnimator(itemAnimator);
-*/
-
             mainListRecyclerView.setAdapter(mAdapter);
-
-
-           // mAdapter.animate();
-
-
 
             noRecordFound.setVisibility(View.GONE);
         } else {
@@ -512,6 +501,48 @@ public void onWindowFocusChanged(boolean hasFocus)
 
 
 
+    private void setUpList() {
+
+       /* fetching list view data from json file which is stored in asset folder*/
+        final String customGSON = "{\"userList\":" + sampleReadMethod() + "}";
+
+        UserListResponseModel userModel = new Gson().fromJson(customGSON, UserListResponseModel.class);
+        mModels = userModel.getList();
+
+        int j=0;
+        for( j = 0;j < mModels.size()-1;j++);
+        {
+
+            UserList model = mModels.get(j);
+            model.setCheckStatus(false);
+            mModels.set(j,model);
+        }
+        setMainListAdapter();
+    }
+
+
+    public String sampleReadMethod()
+    {
+        String json = null;
+        try {
+            InputStream is;
+
+            is = getAssets().open("dev_user_list.json");
+
+
+            int size = is.available();
+            byte[] buffer = new byte[size];
+            is.read(buffer);
+            is.close();
+            json = new String(buffer, "UTF-8");
+        } catch (IOException ex) {
+            ex.printStackTrace();
+            return null;
+        }
+        return json;
+
+
+    }
 
 
 
