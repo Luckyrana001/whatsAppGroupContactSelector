@@ -1,13 +1,22 @@
 <?xml version="1.0" encoding="utf-8"?>
-<android.support.v4.widget.NestedScrollView
+
+<RelativeLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+
+    android:layout_width="match_parent"
+    android:background="@android:color/white"
+    android:layout_height="match_parent"
+    android:orientation="vertical">
+
+
+<android.support.v4.widget.NestedScrollView
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:fillViewport="true"
-    >
+    android:fillViewport="true">
     <LinearLayout
         android:id="@+id/container"
-        android:alpha="0"
+        android:alpha="1"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:orientation="vertical">
@@ -29,6 +38,9 @@
         android:background="?attr/colorPrimary"
         android:minHeight="?attr/actionBarSize"
         android:titleTextColor="#ffffff">
+
+        <include layout="@layout/custom_toolbar_layout"
+            ></include>
     </android.support.v7.widget.Toolbar>
 
      <!--   <android.support.v7.widget.SearchView
@@ -72,7 +84,24 @@
 
         android:gravity="center_vertical|center_horizontal|center"
         android:layout_height="match_parent"/>
-        </LinearLayout>
 
-    </android.support.v4.widget.NestedScrollView>
 
+
+
+    </LinearLayout>
+
+</android.support.v4.widget.NestedScrollView>
+    <android.support.design.widget.FloatingActionButton
+        android:id="@+id/btnCreate"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom|right"
+        android:layout_marginBottom="20dp"
+        android:layout_marginRight="20dp"
+        android:src="@drawable/ic_instagram_white"
+        app:borderWidth="0dp"
+        android:layout_alignParentRight="true"
+        android:layout_alignParentBottom="true"
+        app:elevation="6dp"
+        app:pressedTranslationZ="12dp" />
+</RelativeLayout>

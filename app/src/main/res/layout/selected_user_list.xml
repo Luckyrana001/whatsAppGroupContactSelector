@@ -10,8 +10,12 @@
 <RelativeLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:orientation="vertical" android:layout_width="65dp"
+    android:orientation="vertical" android:layout_width="75dp"
     android:layout_height="wrap_content"
+    android:scaleX="0"
+    android:id="@+id/container"
+
+    android:scaleY="0"
     android:paddingLeft="10dp">
 <LinearLayout
     android:orientation="vertical"
@@ -19,17 +23,16 @@
     android:layout_height="wrap_content">
     <ImageView
         android:id="@+id/profilePic"
-        android:layout_width="50dp"
-        android:layout_height="50dp"
-        android:scaleX="0"
-        android:scaleY="0"
+        android:layout_width="55dp"
+        android:layout_height="55dp"
+
         android:src="@drawable/avatar"/>
 
 <TextView
     android:id="@+id/nametv"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:textSize="11.5sp"
+    android:textSize="12.5sp"
     android:singleLine="true"
     android:maxLength="11"
     android:gravity="center"

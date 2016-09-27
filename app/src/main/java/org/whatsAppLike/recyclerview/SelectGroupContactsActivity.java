@@ -5,10 +5,11 @@ import android.animation.AnimatorListenerAdapter;
 import android.animation.ObjectAnimator;
 import android.animation.PropertyValuesHolder;
 import android.content.Context;
+import android.content.Intent;
 import android.content.res.Resources;
 import android.os.Bundle;
-import android.support.v4.view.MenuItemCompat;
-import android.support.v7.app.ActionBar;
+import android.os.Handler;
+import android.support.design.widget.FloatingActionButton;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.LinearLayoutManager;
@@ -16,13 +17,14 @@ import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.SearchView;
 import android.support.v7.widget.Toolbar;
 import android.view.GestureDetector;
-import android.view.Menu;
-import android.view.MenuInflater;
-import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
+import android.view.animation.Animation;
+import android.view.animation.AnimationUtils;
+import android.view.animation.OvershootInterpolator;
 import android.widget.AdapterView;
 import android.widget.ImageView;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -31,6 +33,7 @@ import com.google.gson.Gson;
 import org.whatsAppLike.recyclerview.adapter.SearchUserAdapter;
 import org.whatsAppLike.recyclerview.adapter.SelectGroupContactsAdaper;
 import org.whatsAppLike.recyclerview.common.DividerItemDecoration;
+import org.whatsAppLike.recyclerview.common.FeedItemAnimator;
 import org.whatsAppLike.recyclerview.common.SearchCallback;
 import org.whatsAppLike.recyclerview.model.UserList;
 import org.whatsAppLike.recyclerview.model.UserListResponseModel;
@@ -41,7 +44,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Created by Rana lucky on 9/1/2016.
+ * Created by Rana lucky
  */
 public class SelectGroupContactsActivity extends AppCompatActivity implements SearchCallback,  AdapterView.OnItemSelectedListener,
         SearchView.OnQueryTextListener {
@@ -60,11 +63,15 @@ public class SelectGroupContactsActivity extends AppCompatActivity implements Se
     private ArrayList<UserList> mModels = new ArrayList<UserList>();
     ArrayList<UserList> selectedModelList = new ArrayList<UserList>();
     Toolbar toolbar;
-    MenuItem doneBtn;
-    private boolean pendingIntroAnimation;
+  //  MenuItem doneBtn;
+    private boolean pendingIntroAnimation = true;
 
 
-    private ActionBar mActionBar;
+    ImageView backBtn;
+    TextView itemCount,doneBtn;
+    SearchView searchV;
+    FloatingActionButton fabCreate;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -94,8 +101,8 @@ public void onWindowFocusChanged(boolean hasFocus)
     super.onWindowFocusChanged(hasFocus);
     if(hasFocus)
     {
-        showContainer();
-        playAnimations = false;
+       // showContainer();
+       // playAnimations = false;
     }
 
 }
@@ -109,27 +116,61 @@ public void onWindowFocusChanged(boolean hasFocus)
 
     public void initToolBar() {
         toolbar = (Toolbar) findViewById(R.id.toolbar);
-        toolbar.setTitle(selectedModelList.size() +" / "+mModels.size());
+       // toolbar.setTitle(selectedModelList.size() +" / "+mModels.size());
 
         setSupportActionBar(toolbar);
+        backBtn   = (ImageView)toolbar.findViewById(R.id.backBtn);
+        backBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                finish();
+            }
+        });
+        itemCount = (TextView)toolbar.findViewById(R.id.itemCount);
+        /*set the intial count of selected / total count*/
+        increaseCount();
 
-                toolbar.setNavigationIcon(R.drawable.ic_toolbar_arrow);
-        toolbar.setNavigationOnClickListener(
-                new View.OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
-                        finish();
-                    }
-                }
+        doneBtn   = (TextView)toolbar.findViewById(R.id.doneTv);
+        backBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+            finish();
+            }
+        });
+        searchV   = (SearchView)toolbar.findViewById(R.id.searchView);
 
-        );
+
+        if (pendingIntroAnimation) {
+            pendingIntroAnimation = false;
+            setToolbar();
+        }
+
+
 
 }
 
+    public void increaseCount(){
+        itemCount.setText("New Group\n"+selectedModelList.size() +" of "+mModels.size()+" selected");
+        /*Animation sgAnimation = AnimationUtils.loadAnimation(getApplicationContext(), R.anim.shake_anim);
+        itemCount.startAnimation(sgAnimation);*/
+
+    }
+
+    public void onBackPressed()
+    {
+        Intent callAgain = new Intent(getApplicationContext(),SelectGroupContactsActivity.class);
+        callAgain.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+        startActivity(callAgain);
+    }
     private void initLayout() {
 
-        toolbar = (Toolbar)findViewById(R.id.toolbar);
-
+        fabCreate = (FloatingActionButton) findViewById(R.id.btnCreate);
+        fabCreate.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Toast.makeText(getApplicationContext(),"Button clicked",Toast.LENGTH_SHORT).show();
+            }
+        });
         container = findViewById(R.id.container);
         mainListRecyclerView = (RecyclerView) findViewById(R.id.main_list_recyclerView);
         selectedListRecylerView = (RecyclerView) findViewById(R.id.selectedListRecylerView);
@@ -194,20 +235,21 @@ public void onWindowFocusChanged(boolean hasFocus)
                     View view3 =  horizontalLayoutManagaer.findViewByPosition(p);
 
                     if(view3!=null) {
-                        ImageView profilePic = (ImageView) view3.findViewById(R.id.profilePic);
-
+                        //ImageView profilePic = (ImageView) view3.findViewById(R.id.profilePic);
+                        RelativeLayout container = (RelativeLayout)view3.findViewById(R.id.container);
                         PropertyValuesHolder scaleXholder = PropertyValuesHolder.ofFloat(View.SCALE_X, 0f);
                         PropertyValuesHolder scaleYholder = PropertyValuesHolder.ofFloat(View.SCALE_Y, 0f);
 
-                        ObjectAnimator animateProfilePic = ObjectAnimator.ofPropertyValuesHolder(profilePic, scaleYholder, scaleXholder);
-                        animateProfilePic.setDuration(1000);
+                        ObjectAnimator animateProfilePic = ObjectAnimator.ofPropertyValuesHolder(container, scaleYholder, scaleXholder);
+                        animateProfilePic.setDuration(300);
                         animateProfilePic.start();
                     }
 
 
                   selectedUserAdapter.remove(newModel);
                 }
-                toolbar.setTitle(selectedModelList.size() +" / "+mModels.size());
+               /*set the intial count of selected / total count*/
+                increaseCount();
 
                 showHideHorizontalView();
        }
@@ -225,7 +267,9 @@ public void onWindowFocusChanged(boolean hasFocus)
             public void onClick(View view, int position) {
 
                 TextView id = (TextView)view.findViewById(R.id.idTv);
-                ImageView profilePic = (ImageView)view.findViewById(R.id.profilePic);
+                //ImageView profilePic = (ImageView)view.findViewById(R.id.profilePic);
+                RelativeLayout container = (RelativeLayout)view.findViewById(R.id.container);
+
                 boolean itemStatus = false;
                 UserList newModel = null;
 
@@ -265,15 +309,16 @@ public void onWindowFocusChanged(boolean hasFocus)
                     PropertyValuesHolder scaleXholder = PropertyValuesHolder.ofFloat(View.SCALE_X,0f);
                     PropertyValuesHolder scaleYholder = PropertyValuesHolder.ofFloat(View.SCALE_Y,0f);
 
-                    ObjectAnimator animateProfilePic = ObjectAnimator.ofPropertyValuesHolder(profilePic,scaleYholder, scaleXholder);
-                    animateProfilePic.setDuration(750);
+                    ObjectAnimator animateProfilePic = ObjectAnimator.ofPropertyValuesHolder(container,scaleYholder, scaleXholder);
+                    animateProfilePic.setDuration(300);
                     animateProfilePic.start();
                     selectedUserAdapter.remove(newModel);
 
                 }
 
                 showHideHorizontalView();
-                toolbar.setTitle(selectedModelList.size() +" / "+mModels.size());
+             /*set the intial count of selected / total count*/
+                increaseCount();
 
 
             }
@@ -291,13 +336,17 @@ public void onWindowFocusChanged(boolean hasFocus)
         if(selectedModelList.size()>0)
         {
 
-
-           // selectedListRecylerView.setVisibility(View.VISIBLE);
+          /*  //Load animation
+            Animation slide_down = AnimationUtils.loadAnimation(getApplicationContext(),   R.anim.slide_up);
+             // Start animation
+            mainListRecyclerView.startAnimation(slide_down);
+*/
+            // selectedListRecylerView.setVisibility(View.VISIBLE);
             PropertyValuesHolder scaleXholder = PropertyValuesHolder.ofFloat(View.SCALE_X, 1f);
             PropertyValuesHolder scaleYholder = PropertyValuesHolder.ofFloat(View.SCALE_Y, 1f);
 
             ObjectAnimator animateView = ObjectAnimator.ofPropertyValuesHolder(selectedListRecylerView, scaleYholder, scaleXholder);
-            animateView.setDuration(750);
+            animateView.setDuration(500);
             animateView.addListener(new AnimatorListenerAdapter() {
                 @Override
                 public void onAnimationStart(Animator animation) {
@@ -311,6 +360,9 @@ public void onWindowFocusChanged(boolean hasFocus)
         }
         else
         {
+            Animation slide_up = AnimationUtils.loadAnimation(getApplicationContext(), R.anim.slide_up);
+            // Start animation
+            mainListRecyclerView.startAnimation(slide_up);
 
             PropertyValuesHolder scaleXholder = PropertyValuesHolder.ofFloat(View.SCALE_X, 0f);
             PropertyValuesHolder scaleYholder = PropertyValuesHolder.ofFloat(View.SCALE_Y, 0f);
@@ -331,8 +383,7 @@ public void onWindowFocusChanged(boolean hasFocus)
 
 
     private void setUpSelectedListAdapter(ArrayList<UserList> list) {
-         horizontalLayoutManagaer
-                = new LinearLayoutManager(getApplicationContext(), LinearLayoutManager.HORIZONTAL, false);
+         horizontalLayoutManagaer      = new LinearLayoutManager(getApplicationContext(), LinearLayoutManager.HORIZONTAL, false);
 
         selectedListRecylerView.setLayoutManager(horizontalLayoutManagaer);
         selectedUserAdapter = new SearchUserAdapter(getApplicationContext(), list,this);
@@ -352,15 +403,41 @@ public void onWindowFocusChanged(boolean hasFocus)
     }
 
 
+    @Override
+    protected void onNewIntent(Intent intent) {
+        super.onNewIntent(intent);
+        if (ACTION_SHOW_LOADING_ITEM.equals(intent.getAction())) {
+            showFeedLoadingItemDelayed();
+        }
+    }
+
+    private void showFeedLoadingItemDelayed() {
+        new Handler().postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                mainListRecyclerView.smoothScrollToPosition(0);
+                mAdapter.showLoadingView();
+            }
+        }, 500);
+    }
     private void setMainListAdapter() {
         mAdapter = new SelectGroupContactsAdaper(getApplicationContext(), mModels);
 
        // if (mModels.size() > 0) {
             mainListRecyclerView.setHasFixedSize(true);
-            RecyclerView.LayoutManager mLayoutManager = new LinearLayoutManager(getApplicationContext());
+           // RecyclerView.LayoutManager mLayoutManager = new LinearLayoutManager(getApplicationContext());
+
+        RecyclerView.LayoutManager mLayoutManager = new LinearLayoutManager(this) {
+            @Override
+            protected int getExtraLayoutSpace(RecyclerView.State state) {
+                return 300;
+            }
+        };
+
             mainListRecyclerView.setLayoutManager(mLayoutManager);
             mainListRecyclerView.addItemDecoration(new DividerItemDecoration(this, LinearLayoutManager.VERTICAL));
-            mainListRecyclerView.setItemAnimator(new DefaultItemAnimator());
+            //mainListRecyclerView.setItemAnimator(new DefaultItemAnimator());
+            mainListRecyclerView.setItemAnimator(new FeedItemAnimator());
 
             mainListRecyclerView.setAdapter(mAdapter);
 
@@ -440,20 +517,55 @@ public void onWindowFocusChanged(boolean hasFocus)
 
 
     private void setToolbar() {
+        fabCreate.setTranslationY(2 * getResources().getDimensionPixelOffset(R.dimen.fab_margin));
 
+        int actionbarSize = dpToPx(56);
+        backBtn.setTranslationY(-actionbarSize);
+        itemCount.setTranslationY(-actionbarSize);
+        searchV.setTranslationY(-actionbarSize);
+        doneBtn.setTranslationY(-actionbarSize);
 
         toolbar.animate()
                     .translationY(0)
                     .setDuration(ANIM_DURATION_TOOLBAR)
                     .setStartDelay(300) ;
-       /* doneBtn.animate()
+        backBtn.animate()
                     .translationY(0)
                     .setDuration(ANIM_DURATION_TOOLBAR)
-                    .setStartDelay(400);*/
-        doneBtn.getActionView().animate()
+                    .setStartDelay(400);
+        itemCount.animate()
+                .translationY(0)
+                .setDuration(ANIM_DURATION_TOOLBAR)
+                .setStartDelay(500);
+
+        searchV.animate()
+                .translationY(0)
+                .setDuration(ANIM_DURATION_TOOLBAR)
+                .setStartDelay(600);
+         doneBtn.animate()
                     .translationY(0)
+                    .setStartDelay(700)
                     .setDuration(ANIM_DURATION_TOOLBAR)
-                    .setStartDelay(500)
+                .setListener(new AnimatorListenerAdapter() {
+                    @Override
+                    public void onAnimationEnd(Animator animation) {
+
+                        setUpList();
+                        /*set the intial count of selected / total count*/
+                        increaseCount();
+
+                        mAdapter. updateItems(mModels);
+
+                        fabCreate.animate()
+                                .translationY(0)
+                                .setInterpolator(new OvershootInterpolator(1.f))
+                                .setStartDelay(500)
+                                .setDuration(ANIM_DURATION_FAB)
+                                .start();
+                    }
+                })
+                .start();
+                   /* .setStartDelay(500);
                     .setListener(new AnimatorListenerAdapter() {
                         @Override
                         public void onAnimationEnd(Animator animation) {
@@ -465,7 +577,7 @@ public void onWindowFocusChanged(boolean hasFocus)
 
                         }
                     })
-                   .start();
+                   .start();*/
 
     }
 
@@ -473,7 +585,7 @@ public void onWindowFocusChanged(boolean hasFocus)
         return (int) (dp * Resources.getSystem().getDisplayMetrics().density);
     }
 
-    @Override
+    /*@Override
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.group_create_menu, menu);
         menu.removeItem(R.id.Next);
@@ -502,7 +614,7 @@ public void onWindowFocusChanged(boolean hasFocus)
 
         }
         return  false;
-    }
+    }*/
     @Override
     public boolean onQueryTextChange(String query) {
         if(mModels.size()>0) {

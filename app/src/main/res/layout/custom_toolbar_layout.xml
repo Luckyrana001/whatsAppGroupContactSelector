@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:orientation="horizontal" android:layout_width="match_parent"
+    android:layout_height="50dp"
+    android:background="@color/colorPrimary">
+
+    <ImageView
+        android:layout_width="50dp"
+        android:layout_height="50dp"
+        android:id="@+id/backBtn"
+        android:padding="12dp"
+        android:src="@drawable/ic_toolbar_arrow"/>
+
+    <TextView
+        android:text="0 / 0"
+        android:layout_width="wrap_content"
+        android:layout_height="match_parent"
+        android:id="@+id/itemCount"
+        android:gravity="left|center_horizontal|center_vertical"
+        android:textSize="14sp"
+        android:textStyle="bold"
+        android:layout_marginLeft="15dp"
+        android:textColor="@android:color/white"/>
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+
+        <android.support.v7.widget.SearchView
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:layout_alignParentRight="true"
+            android:layout_marginRight="60dp"
+            android:id="@+id/searchView"
+            app:searchIcon="@android:drawable/ic_menu_search"
+
+
+            >
+
+
+        </android.support.v7.widget.SearchView>
+
+        <TextView
+            android:text="DONE"
+            android:textColor="@android:color/white"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:id="@+id/doneTv"
+            android:gravity="center"
+            android:textStyle="bold"
+            android:layout_marginRight="15dp"
+            android:layout_alignParentRight="true"
+
+            />
+    </RelativeLayout>
+
+</LinearLayout>

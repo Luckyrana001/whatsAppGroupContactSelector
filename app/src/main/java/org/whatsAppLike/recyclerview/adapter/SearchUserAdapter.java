@@ -10,6 +10,8 @@ import android.view.ViewGroup;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import org.whatsAppLike.recyclerview.R;
@@ -52,6 +54,7 @@ public class SearchUserAdapter extends RecyclerView.Adapter<SearchUserAdapter.Vi
 
        private final TextView tvText,idTv;
         final ImageView crossImg,profilePic;
+        RelativeLayout container;
 
         public ViewHolder(View itemView) {
             super(itemView);
@@ -60,6 +63,8 @@ public class SearchUserAdapter extends RecyclerView.Adapter<SearchUserAdapter.Vi
             crossImg =  (ImageView) itemView.findViewById(R.id.crossImg);
             idTv =  (TextView) itemView.findViewById(R.id.idTv);
             profilePic=  (ImageView) itemView.findViewById(R.id.profilePic);
+
+            container = (RelativeLayout)itemView.findViewById(R.id.container);
            }
 
 
@@ -90,8 +95,8 @@ public class SearchUserAdapter extends RecyclerView.Adapter<SearchUserAdapter.Vi
             PropertyValuesHolder scaleXholder = PropertyValuesHolder.ofFloat(View.SCALE_X, 1f);
             PropertyValuesHolder scaleYholder = PropertyValuesHolder.ofFloat(View.SCALE_Y, 1f);
 
-            ObjectAnimator animateProfilePic = ObjectAnimator.ofPropertyValuesHolder(holder.profilePic, scaleXholder, scaleYholder);
-            animateProfilePic.setDuration(750);
+            ObjectAnimator animateProfilePic = ObjectAnimator.ofPropertyValuesHolder(holder.container, scaleXholder, scaleYholder);
+            animateProfilePic.setDuration(300);
             animateProfilePic.start();
 
 
@@ -142,8 +147,8 @@ public class SearchUserAdapter extends RecyclerView.Adapter<SearchUserAdapter.Vi
             PropertyValuesHolder scaleXholder = PropertyValuesHolder.ofFloat(View.SCALE_X, 1f);
             PropertyValuesHolder scaleYholder = PropertyValuesHolder.ofFloat(View.SCALE_Y, 1f);
 
-            ObjectAnimator animateProfilePic = ObjectAnimator.ofPropertyValuesHolder(itemHolder.profilePic, scaleXholder, scaleYholder);
-            animateProfilePic.setDuration(1000);
+            ObjectAnimator animateProfilePic = ObjectAnimator.ofPropertyValuesHolder(itemHolder.container, scaleXholder, scaleYholder);
+            animateProfilePic.setDuration(300);
             animateProfilePic.start();
         }
     }
@@ -155,8 +160,8 @@ public class SearchUserAdapter extends RecyclerView.Adapter<SearchUserAdapter.Vi
         PropertyValuesHolder scaleXholder = PropertyValuesHolder.ofFloat(View.SCALE_X,0f);
         PropertyValuesHolder scaleYholder = PropertyValuesHolder.ofFloat(View.SCALE_Y,0f);
 
-        ObjectAnimator animateProfilePic = ObjectAnimator.ofPropertyValuesHolder(itemHolder.profilePic,scaleYholder, scaleXholder);
-        animateProfilePic.setDuration(1000);
+        ObjectAnimator animateProfilePic = ObjectAnimator.ofPropertyValuesHolder(itemHolder.container,scaleYholder, scaleXholder);
+        animateProfilePic.setDuration(300);
         animateProfilePic.start();
     }
 
