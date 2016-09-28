@@ -2,14 +2,17 @@ package org.whatsAppLike.recyclerview;
 
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
+import android.animation.AnimatorSet;
 import android.animation.ObjectAnimator;
 import android.animation.PropertyValuesHolder;
+import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.content.res.Resources;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.design.widget.FloatingActionButton;
+import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.LinearLayoutManager;
@@ -19,8 +22,11 @@ import android.support.v7.widget.Toolbar;
 import android.view.GestureDetector;
 import android.view.MotionEvent;
 import android.view.View;
+import android.view.ViewAnimationUtils;
+import android.view.animation.AccelerateInterpolator;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
+import android.view.animation.DecelerateInterpolator;
 import android.view.animation.OvershootInterpolator;
 import android.widget.AdapterView;
 import android.widget.ImageView;
@@ -34,6 +40,7 @@ import org.whatsAppLike.recyclerview.adapter.SearchUserAdapter;
 import org.whatsAppLike.recyclerview.adapter.SelectGroupContactsAdaper;
 import org.whatsAppLike.recyclerview.common.DividerItemDecoration;
 import org.whatsAppLike.recyclerview.common.FeedItemAnimator;
+import org.whatsAppLike.recyclerview.common.RevealBackgroundView;
 import org.whatsAppLike.recyclerview.common.SearchCallback;
 import org.whatsAppLike.recyclerview.model.UserList;
 import org.whatsAppLike.recyclerview.model.UserListResponseModel;
@@ -41,13 +48,25 @@ import org.whatsAppLike.recyclerview.model.UserListResponseModel;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Created by Rana lucky
  */
 public class SelectGroupContactsActivity extends AppCompatActivity implements SearchCallback,  AdapterView.OnItemSelectedListener,
-        SearchView.OnQueryTextListener {
+        SearchView.OnQueryTextListener, RevealBackgroundView.OnStateChangeListener  {
+
+    public static final String ARG_REVEAL_START_LOCATION = "reveal_start_location";
+
+    private static final DecelerateInterpolator DECCELERATE_INTERPOLATOR = new DecelerateInterpolator();
+    private static final AccelerateInterpolator ACCELERATE_INTERPOLATOR = new AccelerateInterpolator();
+    private static final OvershootInterpolator OVERSHOOT_INTERPOLATOR = new OvershootInterpolator(4);
+
+    Map<RecyclerView.ViewHolder, AnimatorSet> likeAnimationsMap = new HashMap<>();
+    Map<RecyclerView.ViewHolder, AnimatorSet> heartAnimationsMap = new HashMap<>();
+
     public static final String ACTION_SHOW_LOADING_ITEM = "action_show_loading_item";
     private static final int ANIM_DURATION_TOOLBAR = 300;
     private static final int ANIM_DURATION_FAB = 400;
@@ -138,7 +157,7 @@ public void onWindowFocusChanged(boolean hasFocus)
             }
         });
         searchV   = (SearchView)toolbar.findViewById(R.id.searchView);
-
+        searchV.setOnQueryTextListener(this);
 
         if (pendingIntroAnimation) {
             pendingIntroAnimation = false;
@@ -153,28 +172,81 @@ public void onWindowFocusChanged(boolean hasFocus)
         itemCount.setText("New Group\n"+selectedModelList.size() +" of "+mModels.size()+" selected");
         /*Animation sgAnimation = AnimationUtils.loadAnimation(getApplicationContext(), R.anim.shake_anim);
         itemCount.startAnimation(sgAnimation);*/
-
+        animateToolBarText();
     }
+
+    private void animateToolBarText() {
+        AnimatorSet animatorSet = new AnimatorSet();
+
+        ObjectAnimator rotationAnim = ObjectAnimator.ofFloat(itemCount, "rotation", 0f, 360f);
+        rotationAnim.setDuration(300);
+        rotationAnim.setInterpolator(ACCELERATE_INTERPOLATOR);
+
+        ObjectAnimator bounceAnimX = ObjectAnimator.ofFloat(itemCount, "scaleX", 0.2f, 1f);
+        bounceAnimX.setDuration(300);
+        bounceAnimX.setInterpolator(OVERSHOOT_INTERPOLATOR);
+
+        ObjectAnimator bounceAnimY = ObjectAnimator.ofFloat(itemCount, "scaleY", 0.2f, 1f);
+        bounceAnimY.setDuration(300);
+        bounceAnimY.setInterpolator(OVERSHOOT_INTERPOLATOR);
+        bounceAnimY.addListener(new AnimatorListenerAdapter() {
+            @Override
+            public void onAnimationStart(Animator animation) {
+                //holder.btnLike.setImageResource(R.drawable.ic_heart_red);
+            }
+
+            @Override
+            public void onAnimationEnd(Animator animation) {
+               // heartAnimationsMap.remove(holder);
+               // dispatchChangeFinishedIfAllAnimationsEnded(holder);
+            }
+        });
+
+        animatorSet.play(bounceAnimX).with(bounceAnimY).after(rotationAnim);
+        animatorSet.start();
+
+       // heartAnimationsMap.put(holder, animatorSet);
+    }
+
 
     public void onBackPressed()
     {
-        Intent callAgain = new Intent(getApplicationContext(),SelectGroupContactsActivity.class);
+       /* Intent callAgain = new Intent(getApplicationContext(),SelectGroupContactsActivity.class);
         callAgain.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-        startActivity(callAgain);
+        startActivity(callAgain);*/
+        show(mainListRecyclerView);/*
+        int[] startingLocation = new int[2];
+        fabCreate.getLocationOnScreen(startingLocation);
+        startingLocation[0] += fabCreate.getWidth() / 2;
+        SelectGroupContactsActivity.startFromLocation(startingLocation, this);
+        overridePendingTransition(0, 0);*/
     }
+    public static void startFromLocation(int[] startingLocation, Activity startingActivity) {
+        Intent intent = new Intent(startingActivity, SelectGroupContactsActivity.class);
+        intent.putExtra(ARG_REVEAL_START_LOCATION, startingLocation);
+        startingActivity.startActivity(intent);
+    }
+
     private void initLayout() {
 
         fabCreate = (FloatingActionButton) findViewById(R.id.btnCreate);
         fabCreate.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Toast.makeText(getApplicationContext(),"Button clicked",Toast.LENGTH_SHORT).show();
+
+               /* hide view using circular reveal animaion*/
+                hide(mainListRecyclerView);
+                Toast.makeText(getApplicationContext(),"Tap back button to change recyler view visibility.",Toast.LENGTH_SHORT).show();
+                /*int[] startingLocation = new int[2];
+                fabCreate.getLocationOnScreen(startingLocation);
+                startingLocation[0] += fabCreate.getWidth() / 2;
+                SelectGroupContactsActivity.startFromLocation(startingLocation, SelectGroupContactsActivity.this);
+                overridePendingTransition(0, 0);*/
             }
         });
         container = findViewById(R.id.container);
         mainListRecyclerView = (RecyclerView) findViewById(R.id.main_list_recyclerView);
         selectedListRecylerView = (RecyclerView) findViewById(R.id.selectedListRecylerView);
-
         noRecordFound = (TextView) findViewById(R.id.noRecordFound);
         mModels = new ArrayList<UserList>();
 
@@ -462,7 +534,11 @@ public void onWindowFocusChanged(boolean hasFocus)
 
     }
 
-
+    @Override
+    public void onStateChange(int state) {
+        //Snackbar.make(SelectGroupContactsActivity.this, "Liked!", Snackbar.LENGTH_SHORT).show();
+Toast.makeText(getApplicationContext(),"Reveal animation finished.",Toast.LENGTH_SHORT).show();
+    }
 
 
     public interface ClickListener {
@@ -585,36 +661,7 @@ public void onWindowFocusChanged(boolean hasFocus)
         return (int) (dp * Resources.getSystem().getDisplayMetrics().density);
     }
 
-    /*@Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        getMenuInflater().inflate(R.menu.group_create_menu, menu);
-        menu.removeItem(R.id.Next);
 
-        doneBtn  = menu.findItem(R.id.Done);
-        doneBtn.setActionView(R.layout.menu_item_view);
-
-        final MenuItem item = menu.findItem(R.id.action_search);
-        final SearchView searchView = (SearchView) MenuItemCompat.getActionView(item);
-        searchView.setOnQueryTextListener(this);
-
-        if (pendingIntroAnimation) {
-            pendingIntroAnimation = false;
-            setToolbar();
-        }
-        return true;
-    }
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        int id = item.getItemId();
-
-
-        if (id == R.id.Done) {
-            Toast.makeText(getApplicationContext(), "Done clicked.", Toast.LENGTH_SHORT).show();
-            return true;
-
-        }
-        return  false;
-    }*/
     @Override
     public boolean onQueryTextChange(String query) {
         if(mModels.size()>0) {
@@ -695,6 +742,52 @@ public void onWindowFocusChanged(boolean hasFocus)
 
 
 
+    // To reveal a previously invisible view using this effect:
+    private void show(final View view) {
+        // get the center for the clipping circle
+        int cx = (view.getLeft() + view.getRight()) / 2;
+        int cy = (view.getTop() + view.getBottom()) / 2;
+
+        // get the final radius for the clipping circle
+        int finalRadius = Math.max(view.getWidth(), view.getHeight());
+
+        // create the animator for this view (the start radius is zero)
+        Animator anim = ViewAnimationUtils.createCircularReveal(view, cx, cy,
+                0, finalRadius);
+        anim.setDuration(1000);
+
+        // make the view visible and start the animation
+        view.setVisibility(View.VISIBLE);
+        anim.start();
+    }
+
+    // To hide a previously visible view using this effect:
+    private void hide(final View view) {
+
+        // get the center for the clipping circle
+        int cx = (view.getLeft() + view.getRight()) / 2;
+        int cy = (view.getTop() + view.getBottom()) / 2;
+
+        // get the initial radius for the clipping circle
+        int initialRadius = view.getWidth();
+
+        // create the animation (the final radius is zero)
+        Animator anim = ViewAnimationUtils.createCircularReveal(view, cx, cy,
+                initialRadius, 0);
+        anim.setDuration(1000);
+
+        // make the view invisible when the animation is done
+        anim.addListener(new AnimatorListenerAdapter() {
+            @Override
+            public void onAnimationEnd(Animator animation) {
+                super.onAnimationEnd(animation);
+                view.setVisibility(View.INVISIBLE);
+            }
+        });
+
+        // start the animation
+        anim.start();
+    }
 
 
 
