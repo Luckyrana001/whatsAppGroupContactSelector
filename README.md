@@ -27,7 +27,9 @@ public void remove(UserList data)
                         
   <BR> <B>  ITEM GROW ANIMATION ALONG WITH NEW ITEM ADD </B>
                       
-  <code>                RelativeLayout container = (RelativeLayout)view.findViewById(R.id.container);
+  <code>                
+  
+                        RelativeLayout container = (RelativeLayout)view.findViewById(R.id.container);
                         PropertyValuesHolder scaleXholder = PropertyValuesHolder.ofFloat(View.SCALE_X, 1f);
                         PropertyValuesHolder scaleYholder = PropertyValuesHolder.ofFloat(View.SCALE_Y, 1f);
                         ObjectAnimator animateProfilePic = ObjectAnimator.ofPropertyValuesHolder(container, scaleYholder, scaleXholder);
