@@ -2,7 +2,7 @@
 whats app like group contact add/remove functionality sample
 
 
-https://drive.google.com/file/d/0B8PFNg_3ky2WUWNldzdnYlB5d00/view?usp=sharing
+<img src="https://github.com/Luckyrana001/whatsAppGroupContactSelector/blob/master/anim.gif" width="350"/>
 To add animation for adding and removing recyler view , following two method are used in adapter of this sample app:
 
  
