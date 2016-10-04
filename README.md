@@ -3,9 +3,8 @@ whats app like group contact add/remove functionality sample
 
 
 <img src="https://github.com/Luckyrana001/whatsAppGroupContactSelector/blob/master/anim.gif" width="350"/>
-To add animation for adding and removing recyler view , following two method are used in adapter of this sample app:
-
- 
+<br>
+To add animation for adding and removing recyler view , following two method are used in adapter of this sample app: 
 
 1 . <B> // Add item containing a specified Data object </B></br>
 public void insert(int position, UserList data)
